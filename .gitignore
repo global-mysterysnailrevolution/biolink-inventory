@@ -7,6 +7,8 @@
 .env.*.local
 .env.development
 .env.test
+.env.railway
+.env.railway.*
 
 # Credentials and secrets
 *.key
