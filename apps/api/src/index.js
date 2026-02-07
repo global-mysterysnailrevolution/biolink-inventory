@@ -24,11 +24,13 @@ import authRouter from './routes/auth.js';
 import itemsRouter from './routes/items.js';
 import unitsRouter from './routes/units.js';
 import reportsRouter from './routes/reports.js';
+import zohoSyncRouter from './routes/zoho-sync.js';
 
 app.use('/api/auth', authRouter);
 app.use('/api/items', itemsRouter);
 app.use('/api/units', unitsRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/zoho-sync', zohoSyncRouter);
 
 // Root route
 app.get('/', (req, res) => {
@@ -40,7 +42,8 @@ app.get('/', (req, res) => {
       auth: '/api/auth',
       items: '/api/items',
       units: '/api/units',
-      reports: '/api/reports'
+      reports: '/api/reports',
+      zohoSync: '/api/zoho-sync'
     }
   });
 });
