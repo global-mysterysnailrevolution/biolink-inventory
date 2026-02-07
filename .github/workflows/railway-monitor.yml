@@ -1,0 +1,104 @@
+name: Monitor Railway Deployments
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+  schedule:
+    # Check every 5 minutes
+    - cron: '*/5 * * * *'
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      
+      - name: Login to Railway
+        run: railway login --browserless
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      
+      - name: Check API Service Status
+        id: api-status
+        run: |
+          echo "Checking API service..."
+          railway status --service ${{ secrets.RAILWAY_API_SERVICE_NAME }} || echo "service=unknown" >> $GITHUB_OUTPUT
+        continue-on-error: true
+      
+      - name: Get Latest Deployment
+        id: deployment
+        run: |
+          DEPLOYMENT=$(railway deployments list --service ${{ secrets.RAILWAY_API_SERVICE_NAME }} --json | jq -r '.[0]')
+          echo "deployment=$DEPLOYMENT" >> $GITHUB_OUTPUT
+        continue-on-error: true
+      
+      - name: Check Deployment Health
+        run: |
+          API_URL="${{ secrets.RAILWAY_API_URL }}"
+          if [ -z "$API_URL" ]; then
+            echo "⚠️ RAILWAY_API_URL not set in secrets"
+            exit 0
+          fi
+          
+          echo "Testing API health endpoint..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/health" || echo "000")
+          
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ API is healthy (HTTP $RESPONSE)"
+          else
+            echo "❌ API health check failed (HTTP $RESPONSE)"
+            echo "::error::API health check failed with status $RESPONSE"
+            exit 1
+          fi
+        continue-on-error: true
+      
+      - name: Get Recent Logs
+        if: failure()
+        run: |
+          echo "📋 Recent logs from API service:"
+          railway logs --service ${{ secrets.RAILWAY_API_SERVICE_NAME }} --tail 50 || true
+        continue-on-error: true
+      
+      - name: Create Issue on Failure
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const title = `🚨 Railway Deployment Health Check Failed - ${new Date().toISOString()}`;
+            const body = `
+            ## Deployment Health Check Failed
+            
+            **Time:** ${new Date().toISOString()}
+            **Service:** ${{ secrets.RAILWAY_API_SERVICE_NAME }}
+            **API URL:** ${{ secrets.RAILWAY_API_URL }}
+            
+            ### Next Steps
+            1. Check Railway dashboard for deployment status
+            2. Review logs: \`railway logs --service ${{ secrets.RAILWAY_API_SERVICE_NAME }}\`
+            3. Verify environment variables are set correctly
+            4. Check database connection
+            
+            ### Quick Fixes
+            - Verify \`DATABASE_URL\` is set in API service
+            - Check that Postgres service is running
+            - Review deployment logs in Railway dashboard
+            `;
+            
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['bug', 'railway', 'deployment']
+            });
