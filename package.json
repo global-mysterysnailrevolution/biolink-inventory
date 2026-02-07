@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "npm run dev --workspace=apps/web",
     "dev:api": "npm run dev --workspace=apps/api",
-    "build": "npm run build --workspace=apps/web || true",
+    "build": "npm run build --workspace=apps/web",
     "build:api": "echo 'API has no build step'",
     "build:web": "npm run build --workspace=apps/web",
     "test": "npm run test --workspaces || true",
