@@ -31,6 +31,25 @@ CREATE TABLE IF NOT EXISTS physical_units (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Users (must be created before events table)
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(50) NOT NULL, -- 'ADMIN' or 'WAREHOUSE'
+  name VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Organizations/Programs
+CREATE TABLE IF NOT EXISTS organizations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(255) NOT NULL,
+  type VARCHAR(50) NOT NULL, -- 'org' or 'program'
+  parent_id UUID REFERENCES organizations(id),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
 -- Containment relationships
 CREATE TABLE IF NOT EXISTS containments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -44,7 +63,7 @@ CREATE TABLE IF NOT EXISTS containments (
   UNIQUE(parent_unit_id, child_unit_id, effective_from)
 );
 
--- Events (immutable audit log)
+-- Events (immutable audit log) - must be after users table
 CREATE TABLE IF NOT EXISTS events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   type VARCHAR(50) NOT NULL,
@@ -52,25 +71,6 @@ CREATE TABLE IF NOT EXISTS events (
   user_id UUID REFERENCES users(id),
   timestamp TIMESTAMP DEFAULT NOW(),
   metadata JSONB NOT NULL
-);
-
--- Organizations/Programs
-CREATE TABLE IF NOT EXISTS organizations (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(255) NOT NULL,
-  type VARCHAR(50) NOT NULL, -- 'org' or 'program'
-  parent_id UUID REFERENCES organizations(id),
-  created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Users
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  role VARCHAR(50) NOT NULL, -- 'ADMIN' or 'WAREHOUSE'
-  name VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Indexes
