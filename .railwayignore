@@ -1,0 +1,16 @@
+node_modules
+.git
+.env
+.env.local
+.next
+dist
+build
+coverage
+.railway
+.vscode
+.idea
+*.log
+uploads
+.ai/logs
+.ai/state
+.ai/_backups

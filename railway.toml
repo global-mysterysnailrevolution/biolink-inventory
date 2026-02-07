@@ -1,0 +1,8 @@
+# Railway configuration for monorepo
+# This file tells Railway how to handle the monorepo structure
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "cd apps/api && npm start"
