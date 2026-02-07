@@ -1,0 +1,25 @@
+{
+  "name": "biolink-inventory",
+  "version": "1.0.0",
+  "description": "Bio-Link Depot Inventory System",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "migrate": "node apps/api/src/scripts/migrate.js",
+    "migrate:create": "node apps/api/src/scripts/migrate-create.js",
+    "migrate:rollback": "node apps/api/src/scripts/migrate-rollback.js",
+    "seed": "node apps/api/src/scripts/seed.js",
+    "db:ping": "node apps/api/src/scripts/db-ping.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
