@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
+    "start:with-migrations": "node src/scripts/start.js",
     "build": "echo 'API has no build step'",
     "migrate": "node src/scripts/migrate.js",
     "seed": "node src/scripts/seed.js",
