@@ -9,9 +9,10 @@
   "scripts": {
     "dev": "node --watch src/index.js",
     "start": "node src/index.js",
+    "build": "echo 'API has no build step'",
     "migrate": "node src/scripts/migrate.js",
     "seed": "node src/scripts/seed.js",
-    "postinstall": "npm run migrate || true"
+    "postinstall": "echo 'Skipping migrations in postinstall'"
   },
   "dependencies": {
     "express": "^4.18.2",

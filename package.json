@@ -10,7 +10,9 @@
   "scripts": {
     "dev": "npm run dev --workspace=apps/web",
     "dev:api": "npm run dev --workspace=apps/api",
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspace=apps/web",
+    "build:api": "echo 'API has no build step'",
+    "build:web": "npm run build --workspace=apps/web",
     "test": "npm run test --workspaces",
     "migrate": "node apps/api/src/scripts/migrate.js",
     "migrate:create": "node apps/api/src/scripts/migrate-create.js",
